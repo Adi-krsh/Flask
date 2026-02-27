@@ -2,10 +2,18 @@ from flask import Flask, render_template, request, redirect, url_for
 import mysql.connector
 import os
 
-# IMPORTANT: Do NOT use custom template paths on Vercel
-app = Flask(__name__)
+# -------- FIX TEMPLATE PATH FOR VERCEL -------- #
 
-# Database configuration (from Vercel environment variables)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+app = Flask(
+    __name__,
+    template_folder=os.path.join(BASE_DIR, "templates"),
+    static_folder=os.path.join(BASE_DIR, "static"),
+)
+
+# -------- DATABASE CONFIG -------- #
+
 DB_CONFIG = {
     "host": os.environ.get("DB_HOST"),
     "user": os.environ.get("DB_USER"),
@@ -17,7 +25,7 @@ def get_db_connection():
     return mysql.connector.connect(**DB_CONFIG)
 
 
-# ---------- ROUTES ---------- #
+# -------- ROUTES -------- #
 
 @app.route("/")
 def home():
@@ -39,8 +47,10 @@ def add_user():
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        sql = "INSERT INTO users (username, email, password) VALUES (%s, %s, %s)"
-        cursor.execute(sql, (username, email, password))
+        cursor.execute(
+            "INSERT INTO users (username, email, password) VALUES (%s, %s, %s)",
+            (username, email, password),
+        )
         conn.commit()
 
         cursor.close()
@@ -63,7 +73,7 @@ def login_user():
 
         cursor.execute(
             "SELECT * FROM users WHERE username = %s AND password = %s",
-            (username, password)
+            (username, password),
         )
         user = cursor.fetchone()
 
@@ -72,12 +82,11 @@ def login_user():
 
         if user:
             return f"Welcome, {user[1]}"
-        else:
-            return "Invalid credentials"
+        return "Invalid credentials"
 
     except Exception as e:
         return f"Login error: {str(e)}"
 
 
-# IMPORTANT for Vercel serverless
+# Required for Vercel serverless
 app = app
