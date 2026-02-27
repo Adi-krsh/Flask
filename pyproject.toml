@@ -1,0 +1,7 @@
+[project]
+name = "flask-app"
+version = "0.1.0"
+dependencies = [
+    "Flask",
+    "mysql-connector-python"
+]
