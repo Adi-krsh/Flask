@@ -5,19 +5,27 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>Login Page</h1>
+    <div class="container">
+        <h2>Login</h2>
 
-    <form action="/user/login" method="POST">
-        <label>Username:</label>
-        <input type="text" name="username" required><br><br>
+        <form action="/user/login" method="POST">
+            <div class="input-group">
+                <label>Username</label>
+                <input type="text" name="username" required>
+            </div>
 
-        <label>Password:</label>
-        <input type="password" name="password" required><br><br>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" name="password" required>
+            </div>
 
-        <button type="submit">Login</button>
-    </form>
+            <button type="submit">Login</button>
+        </form>
 
-    <br>
-    <a href="/signup">Go to Sign Up</a>
+        <p class="link-text">
+            Don't have an account?
+            <a href="/signup">Sign Up</a>
+        </p>
+    </div>
 </body>
 </html>
