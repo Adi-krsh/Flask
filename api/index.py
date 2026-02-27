@@ -1,24 +1,19 @@
 from flask import Flask, render_template, request, redirect, url_for
-import mysql.connector
+import psycopg2
 import os
 
-# Flask app (no custom template paths needed now)
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    template_folder="../templates",
+    static_folder="../static"
+)
 
-# Database config (from Vercel Environment Variables)
-DB_CONFIG = {
-    "host": os.environ.get("DB_HOST"),
-    "user": os.environ.get("DB_USER"),
-    "password": os.environ.get("DB_PASSWORD"),
-    "database": os.environ.get("DB_NAME")
-}
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
 
 def get_db_connection():
-    return mysql.connector.connect(**DB_CONFIG)
+    return psycopg2.connect(DATABASE_URL)
 
-
-# ---------------- ROUTES ---------------- #
 
 @app.route("/")
 def home():
@@ -40,10 +35,12 @@ def add_user():
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        sql = "INSERT INTO users (username, email, password) VALUES (%s, %s, %s)"
-        cursor.execute(sql, (username, email, password))
-        conn.commit()
+        cursor.execute(
+            "INSERT INTO users (username, email, password) VALUES (%s, %s, %s)",
+            (username, email, password)
+        )
 
+        conn.commit()
         cursor.close()
         conn.close()
 
@@ -63,11 +60,11 @@ def login_user():
         cursor = conn.cursor()
 
         cursor.execute(
-            "SELECT * FROM users WHERE username = %s AND password = %s",
+            "SELECT * FROM users WHERE username=%s AND password=%s",
             (username, password)
         )
-        user = cursor.fetchone()
 
+        user = cursor.fetchone()
         cursor.close()
         conn.close()
 
@@ -80,5 +77,4 @@ def login_user():
         return f"Login error: {str(e)}"
 
 
-# IMPORTANT for Vercel serverless
 app = app
